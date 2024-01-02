@@ -8,8 +8,11 @@ import {
   InputRightElement,
   VStack,
 } from "@chakra-ui/react";
+import { useToast } from "@chakra-ui/react";
 import React, { useState } from "react";
-
+import { Navigate } from "react-router-dom";
+import axios from "axios";
+import api from "../config";
 const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -17,19 +20,135 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [pic, setPic] = useState();
   const [show, setShow] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const toast = useToast();
+
+  console.log(pic);
+
 
   const handleViewPassword = () => {
     setShow(!show);
   };
 
-  const postPic = (pic) => {};
+  const postPic = (pics) => {
+    setLoading(true);
+    if (pics === undefined) {
+      toast({
+        title: "Please Select an Image.",
+        status: "warning",
+        duration: 5000,
+        isClosable: true,
+      });
+      setTimeout(()=>{
+        setLoading(false)
+      },1000)
+      return;
+    }
+    console.log(pics);
+    if (
+      pics.type === "image/jpeg" ||
+      pics.type === "image/png" ||
+      pics.type === "image/jpg"
+    ) {
+      const data = new FormData();
+      data.append("file", pics);
+      data.append("upload_preset", "justchat");
+      data.append("cloud_name", "dupcmbewe");
+      fetch("https://api.cloudinary.com/v1_1/dupcmbewe/image/upload", {
+        method: "POST",
+        body: data,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setPic(data.url.toString());
+          setTimeout(()=>{
+            setLoading(false)
+          },1000)
+        })
+        .catch((err) => {
+          console.log(err);
+          setTimeout(()=>{
+            setLoading(false)
+          },1000)
+        });
+    } else {
+      toast({
+        title: "Please Select an Image.",
+        description: "We've created your account for you.",
+        status: "warning",
+        duration: 5000,
+        isClosable: true,
+      });
+      setTimeout(()=>{
+        setLoading(false)
+      },1000)
+      return;
+    }
+  };
 
-  const submitRegisterForm = () => {};
+  const submitRegisterForm = async () => {
+    setLoading(true);
+    if (!name || !email || !password || !confirmPassword) {
+      toast({
+        title: "Please fill all the fields.",
+        status: "warning",
+        duration: 5000,
+        isClosable: true,
+      });
+      setTimeout(()=>{
+        setLoading(false)
+      },3000)
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast({
+        title: "Password do not match.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      setTimeout(()=>{
+        setLoading(false)
+      },1000)
+      return;
+    }
+    try {
+      const result = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+      const { data } = await axios.post(`${api}/users/register`
+        ,
+        {
+          name,
+          email,
+          password,
+          pic,
+        },
+        result
+      );
+      toast({
+        title: "Registration Successful",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
+      localStorage.setItem("userInfo", JSON.stringify(data));
+      setLoading(false);
+      //  history.push("/chats")
+      <Navigate to="/chats"> </Navigate>;
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <VStack spacing="5px">
       <FormControl isRequired>
-        <FormLabel> Name</FormLabel>
+        <FormLabel> Name </FormLabel>
         <Input
           placeholder="Enter Your Name"
           value={name}
@@ -85,6 +204,7 @@ const Register = () => {
         width="50%"
         marginTop="15px"
         onClick={submitRegisterForm}
+        isLoading={loading}
       >
         Register
       </Button>

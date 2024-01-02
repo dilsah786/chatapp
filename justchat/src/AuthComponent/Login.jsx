@@ -7,13 +7,20 @@ import {
   InputGroup,
   InputRightElement,
   VStack,
+  useToast,
 } from "@chakra-ui/react";
+import axios from "axios";
+import api from "../config";
 import React, { useState } from "react";
+import { Navigate } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [pic, setPic] = useState();
+  const toast = useToast();
 
   const handleViewPassword = () => {
     setShow(!show);
@@ -21,7 +28,65 @@ const Login = () => {
 
   const postPic = (pic) => {};
 
-  const submitLoginForm = () => {};
+  const submitLoginForm = async () => {
+
+    setTimeout(()=>{
+      setLoading(true);
+    })
+    if (!email || !password) {
+      toast({
+        title: "Please fill all the fields.",
+        status: "warning",
+        duration: 5000, 
+        isClosable: true,
+      });
+      setTimeout(() => {
+        setLoading(false);
+      }, 2000);
+      return;
+    }
+
+    try {
+      const result = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+      const { data } = await axios.post(
+        `${api}/users/login`,
+        {
+          email,
+          password,
+        },
+        result
+      );
+      console.log(data);
+      toast({
+        title: "Registration Successful",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
+      localStorage.setItem("userInfo", JSON.stringify(data));
+      setLoading(false);
+      //  history.push("/chats")
+      <Navigate to="/chats"> </Navigate>;
+      return;
+    } catch (error) {
+      console.log(error);
+      toast({
+        title: "Registration Failed ",
+        description: "Please Try Again",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
+      setLoading(false);
+      return;
+    }
+  };
 
   return (
     <VStack spacing="5px">
@@ -50,14 +115,15 @@ const Login = () => {
         </InputGroup>
       </FormControl>
 
-      <Button
+      <Navigate to="/chats"><Button
         colorScheme="blue"
         width="50%"
         marginTop="15px"
         onClick={submitLoginForm}
+        isLoading={loading}
       >
         Login
-      </Button>
+      </Button></Navigate>
       <Button
         colorScheme="red"
         onClick={(e) => {

@@ -7,11 +7,9 @@ import Register from "./AuthComponent/Register";
 import MainAuth from "./AuthComponent/MainAuth";
 
 function App() {
- 
   return (
     <div className="App">
-      <AllRoutes />      
-      <MainAuth/>
+      <AllRoutes />
     </div>
   );
 }

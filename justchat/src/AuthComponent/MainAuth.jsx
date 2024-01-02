@@ -37,10 +37,10 @@ const MainAuth = () => {
           </TabList>
           <TabPanels>
             <TabPanel>
-              <Register/>
+              <Register />
             </TabPanel>
             <TabPanel>
-             <Login/>
+              <Login />
             </TabPanel>
           </TabPanels>
         </Tabs>
