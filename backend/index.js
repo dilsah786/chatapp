@@ -1,8 +1,9 @@
 const express = require("express");
 const { chats } = require("./data/dummy");
-const connection = require("./db");
+const {connection, connect} = require("./db");
 const dotenv = require("dotenv")
-const cors = require("cors")
+const cors = require("cors");
+const { userController } = require("./Controllers/user.routes");
 
 const app = express();
 
@@ -27,11 +28,15 @@ app.get("/chats/:id", (req, res) => {
   });
 
 
+app.use("/users",userController)
+
+
+
 app.listen(process.env.Port || 5000, async () => {
   try {
-    await connection;
-    console.log("App is Conncted to mongoDB");
-  } catch (error) {
+    await connect;
+    console.log("App is Conncted to mongoDB",);
+  } catch (error) { 
     console.log(error);
   }
   console.log("App is running on port 5000");

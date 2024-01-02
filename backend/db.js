@@ -1,5 +1,15 @@
 const mongoose = require("mongoose");
+const { MongoClient } = require("mongodb");
+const dotenv = require("dotenv");
 
-const connection = mongoose.connect("mongodb+srv://dilsah786:dilsah786@cluster0.z3e3wgc.mongodb.net/")
+dotenv.config();
 
-module.exports = connection; 
+const mongoserver = process.env.MongoUrl;
+const client = new MongoClient(mongoserver);
+
+const connect = mongoose.connect(mongoserver,{
+    
+    
+});
+
+module.exports = {connect}; 
