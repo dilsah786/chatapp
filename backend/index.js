@@ -5,6 +5,8 @@ const dotenv = require("dotenv")
 const cors = require("cors");
 const { userController, searchController } = require("./Controllers/user.routes");
 const { authMiddleware } = require("./Middleware/authMiddleware");
+const { ChatModel } = require("./models/chatModel");
+const { chatController } = require("./Controllers/chats.routes");
 
 const app = express();
  
@@ -20,25 +22,17 @@ app.use("/users",userController)
 
  app.use(authMiddleware)
 
- app.use("/users",searchController)
+  app.use("/users",searchController)
 
 app.get("/", (req, res) => {
   res.json("HELLO");
 });
 
-app.get("/chats", (req, res) => {
-  console.log(req.body.userId);
-  res.json({chats:chats,_userId:req.body.userId})
-});
+app.use("/chat",chatController)
 
-app.get("/chats/:id", (req, res) => {
-    const id = req.params.id;
-    console.log(id);
-    const singleChat = chats.find((c)=>c._id === id)
-    res.send(singleChat);
-  });
 
-  app.use("/*",(req,res)=>{
+
+  app.use("/*",(req,res)=>{ 
     res.json({status:"Failed",message:"Please Look For Correct Url"})
  })
 
