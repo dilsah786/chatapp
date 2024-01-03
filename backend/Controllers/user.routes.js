@@ -1,26 +1,26 @@
 const express = require("express");
 const { UserModel } = require("../models/userModel");
 const bcrypt = require("bcrypt");
+const { generateToken } = require("../config");
 const userController = express.Router();
+const searchController = express.Router();
 
-userController.get("/", async (req, res) => {
-  res.json({ status: "Success", data: "Hello Users" });
+
+searchController.get("/", async (req, res) => {
+  const { search } = req.query;
+  const userId = req.body.id;
+  const searchedUser = await UserModel.find({
+    $or: [
+      { name: { $regex: search, $options: "i" } },
+      { email: { $regex: search, $options: "i" } },
+    ],
+  })
+
+  console.log(search);
+  res.json({ data: searchedUser });
 });
 
-userController.post("/login", async (req, res) => {
-    const { name, email, password, pic } = req.body;
-    
-    const user = await UserModel.findOne({email:email
-    })
-    console.log(user);
-    const hashedPassword = user.password;
-    console.log(hashedPassword);
-    bcrypt.compare(password, hash, function(err, result) {
-        // result == true
-    });
-
-  res.json({ status: "Success", data: "Hello Users" });
-});
+// Register User
 
 userController.post("/register", async (req, res) => {
   const { name, email, password, pic } = req.body;
@@ -33,27 +33,56 @@ userController.post("/register", async (req, res) => {
   if (userExits) {
     res.json({ status: "User already exists" });
   }
- 
+
   bcrypt.hash(password, 8, async function (err, hash) {
     // Store hash in your password DB.
-    if(err || !hash ){
-        res.json({status:"Invalid Password"})
-    }else{
-    const user = await UserModel.create({
-      name,
-      email,
-      password: hash,
-      pic,
-    });
-    if (user) {
-        res.status({ status: "user Created Successfully" });
+    if (err || !hash) {
+      res.json({ status: "Invalid Password" });
+    } else {
+      const user = await UserModel.create({
+        name,
+        email,
+        password: hash,
+        pic,
+      });
+      if (user) {
+        res.json({
+          status: "user Created Successfully",
+          data: {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            pic: user.pic,
+            token: generateToken(user._id),
+          },
+        });
       }
-}
-  }); 
-
-  
-
- // res.json({ status: "Success", data: "Hello Users" });
+    }
+  });
 });
 
-module.exports = { userController };
+// Login User
+
+userController.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await UserModel.findOne({ email: email });
+  console.log(user);
+  const hashedPassword = user.password;
+  console.log(hashedPassword);
+  bcrypt.compare(password, hashedPassword, function (err, result) {
+    // result == true
+
+    res.json({
+      status: "Success",
+      Message: "User logged in Successfully",
+      data: {
+        name: user.name,
+        email: user.email,
+        token: generateToken(user._id),
+      },
+    });
+  });
+});
+
+module.exports = { userController,searchController };

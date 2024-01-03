@@ -3,21 +3,32 @@ const { chats } = require("./data/dummy");
 const {connection, connect} = require("./db");
 const dotenv = require("dotenv")
 const cors = require("cors");
-const { userController } = require("./Controllers/user.routes");
+const { userController, searchController } = require("./Controllers/user.routes");
+const { authMiddleware } = require("./Middleware/authMiddleware");
 
 const app = express();
-
+ 
 app.use(cors())
-
 app.use(express.json());
 dotenv.config();
 
+
+
+app.use("/users",userController)
+
+
+
+ app.use(authMiddleware)
+
+ app.use("/users",searchController)
+
 app.get("/", (req, res) => {
-  res.send("HELLO");
+  res.json("HELLO");
 });
 
 app.get("/chats", (req, res) => {
-  res.send(chats);
+  console.log(req.body.userId);
+  res.json({chats:chats,_userId:req.body.userId})
 });
 
 app.get("/chats/:id", (req, res) => {
@@ -27,10 +38,11 @@ app.get("/chats/:id", (req, res) => {
     res.send(singleChat);
   });
 
+  app.use("/*",(req,res)=>{
+    res.json({status:"Failed",message:"Please Look For Correct Url"})
+ })
 
-app.use("/users",userController)
-
-
+ 
 
 app.listen(process.env.Port || 5000, async () => {
   try {
