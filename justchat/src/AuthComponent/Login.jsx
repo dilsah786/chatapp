@@ -15,12 +15,23 @@ import React, { useState } from "react";
 import { Navigate } from "react-router-dom";
 
 const Login = () => {
+  const [profile,setProfile] = useState([])
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pic, setPic] = useState();
   const toast = useToast();
+ 
+  const tokenFromLocal = JSON.parse(localStorage.getItem("userInfo"));
+  let token;
+  if(tokenFromLocal){
+     token = tokenFromLocal.data.token
+  }
+
+   if(token){
+    return <Navigate to="/chats"></Navigate>
+   }
 
   const handleViewPassword = () => {
     setShow(!show);
@@ -61,6 +72,8 @@ const Login = () => {
         result
       );
       console.log(data);
+      setProfile(data)
+      console.log(profile);
       toast({
         title: "Registration Successful",
         status: "success",
@@ -71,7 +84,7 @@ const Login = () => {
       localStorage.setItem("userInfo", JSON.stringify(data));
       setLoading(false);
       //  history.push("/chats")
-      <Navigate to="/chats"> </Navigate>;
+     
       return;
     } catch (error) {
       console.log(error);
@@ -115,7 +128,7 @@ const Login = () => {
         </InputGroup>
       </FormControl>
 
-      <Navigate to="/chats"><Button
+      <Button
         colorScheme="blue"
         width="50%"
         marginTop="15px"
@@ -123,7 +136,7 @@ const Login = () => {
         isLoading={loading}
       >
         Login
-      </Button></Navigate>
+      </Button>
       <Button
         colorScheme="red"
         onClick={(e) => {

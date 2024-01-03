@@ -24,7 +24,11 @@ const Register = () => {
   const toast = useToast();
 
   console.log(pic);
-
+  const tokenFromLocal = JSON.parse(localStorage.getItem("userInfo"));
+  let token;
+  if(tokenFromLocal){
+     token = tokenFromLocal.data.token
+  }
 
   const handleViewPassword = () => {
     setShow(!show);

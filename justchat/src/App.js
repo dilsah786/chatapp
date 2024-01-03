@@ -5,11 +5,13 @@ import api from "./config";
 import { Box, Container, Text } from "@chakra-ui/react";
 import Register from "./AuthComponent/Register";
 import MainAuth from "./AuthComponent/MainAuth";
+import Chats from "./component/Chats";
 
 function App() {
   return (
     <div className="App">
-      <AllRoutes />
+    <Chats/>
+      
     </div>
   );
 }
