@@ -13,22 +13,18 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerOverlay,
-  Image,
   Input,
   Menu,
   MenuButton,
   MenuDivider,
   MenuItem,
   MenuList,
-  Stack,
+  Spinner,
   Text,
-  Toast,
   Tooltip,
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
-
-import { ViewIcon } from "@chakra-ui/icons";
 
 import React, { useContext, useState } from "react";
 import { ChatContext } from "../Context/chatContext";
@@ -42,7 +38,8 @@ const SideDrawer = () => {
   const [searchResult, setSearchResult] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingChat, setLoadingChat] = useState();
-  const { user, logout, token,setSelectedChat ,chats,setChats } = useContext(ChatContext);
+  const { user, logout, token,selecredChat, setSelectedChat, chats, setChats } =
+    useContext(ChatContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
@@ -57,7 +54,7 @@ const SideDrawer = () => {
       });
     }
     try {
-      setLoading(true);
+      setLoadingChat(true);
       const searchedUser = await fetch(`${api}/users?search=${search}`, {
         method: "GET",
         headers: {
@@ -67,6 +64,7 @@ const SideDrawer = () => {
       });
       const res = await searchedUser.json();
       setSearchResult(res.data);
+      setLoadingChat(false)
       setLoading(false);
     } catch (err) {
       console.log(err);
@@ -80,22 +78,38 @@ const SideDrawer = () => {
     }
   };
 
-  const accessChat = async(id) =>{
-    setLoadingChat(true);
-     try {
-      const singleUserChat = await fetch(`${api}/chat`,{
-         method:"POST",
-         headers:{
-          "Content-Type":"application/json",
-          Authorization:`Bearer ${token}`
-         },
-         body:JSON.stringify(id)
-      })
+  console.log(chats);
+
+
+const accessChat = async (id) => {
+    console.log(id);
+   
+    try {
+      const userId = user.id;   
+    console.log(userId);
+
+      setLoadingChat(true);
+      const result = await fetch(`${api}/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({user:id,userId:userId}),
+      });
+      
+      const res  = await result.json();
+
+      console.log(res);
+      if(!chats.find((c)=> c._id === res._id ))
+      setChats([res, ...chats])
+    
+      setSelectedChat(res);
       setLoadingChat(false);
-      setSelectedChat(singleUserChat);
-      onClose()
-     } catch (error) {
+      onClose();
+    } catch (error) {
       console.log(error);
+      setLoadingChat(false);
       toast({
         title: "Error Occured",
         status: "error",
@@ -103,9 +117,8 @@ const SideDrawer = () => {
         duration: 5000,
         position: "left-top",
       });
-     }
-  }
-
+    }
+  };
 
   console.log(searchResult);
   return (
@@ -183,13 +196,16 @@ const SideDrawer = () => {
               <Loader />
             ) : (
               searchResult?.map((user) => {
-                return <UserAvatar 
-                key={user._id}
-                user = {user}
-                handleFunction = {()=> accessChat(user._id)}
-                 /> 
+                return (
+                  <UserAvatar
+                    key={user._id}
+                    user={user}
+                    handleSingleChat={() => accessChat(user._id)}
+                  />
+                );
               })
             )}
+            {loadingChat && <Spinner ml="auto" display="flex" />}
           </DrawerBody>
         </DrawerContent>
       </Drawer>

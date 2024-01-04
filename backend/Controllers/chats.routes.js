@@ -4,6 +4,34 @@ const { UserModel } = require("../models/userModel");
 
 const chatController = express.Router();
 
+
+
+// fetch Chats
+chatController.get("/", async (req, res) => {
+  const { userId } = req.body;
+  if(!userId){
+    return res.json({status:"Please Login First"})
+  }
+  try {
+    const findChatsByUserId = await ChatModel.find({
+      users: { $elemMatch: { $eq: userId } },
+    })
+      .populate("users", "-password")
+      .populate("groupAdmin", "-password")
+      .populate("latestMessage")
+      .sort({ updatedAt: -1 })
+      .then(async (results) => {
+        results = await UserModel.populate(results, {
+          path: "latestMessage.sender",
+          select: "name pic email",
+        });
+        res.status(200).json({ data:results });
+      });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 // access Chats
 chatController.post("/", async (req, res) => {
   const { user, userId } = req.body;
@@ -46,31 +74,6 @@ chatController.post("/", async (req, res) => {
   }
 });
 
-// fetch Chats
-chatController.get("/", async (req, res) => {
-  const { userId } = req.body;
-  if(!userId){
-    return res.json({status:"Please Login First"})
-  }
-  try {
-    const findChatsByUserId = await ChatModel.find({
-      users: { $elemMatch: { $eq: userId } },
-    })
-      .populate("users", "-password")
-      .populate("groupAdmin", "-password")
-      .populate("latestMessage")
-      .sort({ updatedAt: -1 })
-      .then(async (results) => {
-        results = await UserModel.populate(results, {
-          path: "latestMessage.sender",
-          select: "name pic email",
-        });
-        res.status(200).json({ data:results });
-      });
-  } catch (error) {
-    console.log(error);
-  }
-});
 
 chatController.post("/creategroup", async (req, res) => {
   const { users, groupName, userId } = req.body;

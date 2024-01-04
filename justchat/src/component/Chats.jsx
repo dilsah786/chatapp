@@ -20,28 +20,6 @@ const Chats = () => {
   }
 
  
-  const getChats = async (token) => {
-    try {
-      const result = await axios.get(`${api}/chat`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setChats(result.data.data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-  
-  if(token){
-    getChats();
-  }
-  console.log(chats);
-
-  useEffect(() => {
-    getChats(token);
-  }, [token, api]);
 
   return (
     <Container>
@@ -49,11 +27,12 @@ const Chats = () => {
 
       <Box
         display="flex"
-        flexDirection={"row"}
+        flexDirection="row"
         justifyContent="space-between"
+        gap={"500px"}
         w="100%"
         h="91.5vh"
-       
+        
         p="10px"
       >
         {user && <MyChats />}

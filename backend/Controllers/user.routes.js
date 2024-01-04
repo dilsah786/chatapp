@@ -67,7 +67,6 @@ userController.post("/register", async (req, res) => {
 
 userController.post("/login", async (req, res) => {
   const { email, password } = req.body;
-
   const user = await UserModel.findOne({ email: email });
   console.log(user);
   const hashedPassword = user.password;
@@ -79,6 +78,7 @@ userController.post("/login", async (req, res) => {
       status: "Success",
       Message: "User logged in Successfully",
       data: {
+        id:user._id,
         name: user.name,
         email: user.email,
         pic:user.pic,
