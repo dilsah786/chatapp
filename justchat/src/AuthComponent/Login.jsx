@@ -58,24 +58,18 @@ const Login = () => {
     }
 
     try {
-      const result = {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      };
       const { data } = await axios.post(
         `${api}/users/login`,
         {
           email,
           password,
         },
-        result
       );
       console.log(data);
       setProfile(data)
       console.log(profile);
       toast({
-        title: "Registration Successful",
+        title: "Login Successful",
         status: "success",
         duration: 5000,
         isClosable: true,
@@ -89,7 +83,7 @@ const Login = () => {
     } catch (error) {
       console.log(error);
       toast({
-        title: "Registration Failed ",
+        title: "Login Failed Failed ",
         description: "Please Try Again",
         status: "error",
         duration: 5000,

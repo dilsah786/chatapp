@@ -11,13 +11,15 @@ const Chats = () => {
   const [chats, setChats] = useState([]);
   const { user } = useContext(ChatContext);
 
-  console.log(user);
+  // console.log(user);
 
   const tokenFromLocal = JSON.parse(localStorage.getItem("userInfo"));
   let token;
   if (tokenFromLocal) {
     token = tokenFromLocal.data.token;
   }
+
+ 
   const getChats = async (token) => {
     try {
       const result = await axios.get(`${api}/chat`, {
@@ -31,7 +33,10 @@ const Chats = () => {
       console.log(err);
     }
   };
-
+  
+  if(token){
+    getChats();
+  }
   console.log(chats);
 
   useEffect(() => {

@@ -5,16 +5,26 @@ const ChatContext = createContext();
 
 const ChatProvider = ({children}) =>{
   const [user,setUser] = useState();
+  const [token,setToken] = useState();
+  const [selectedChat,setSelectedChat] = useState();
+  const [chats,setChats] = useState()
 
   useEffect(()=>{
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-    setUser(userInfo.data)
-    if(!userInfo){
-      <Navigate to="/auth"></Navigate>
+    if(userInfo){
+      setUser(userInfo.data)
+      setToken(userInfo.data.token)
     }
   },[])
 
-  return <ChatContext.Provider value={{user,setUser}} >{children}</ChatContext.Provider>
+  const logout = ()=>{
+    localStorage.removeItem("userInfo");
+    if(!localStorage.getItem("userInfo")){
+    <Navigate to="auth"></Navigate>
+    }
+  }
+
+  return <ChatContext.Provider value={{user,setUser,logout,token,setSelectedChat,selectedChat, chats,setChats}} >{children}</ChatContext.Provider>
 }
 
 export  {ChatProvider,ChatContext};

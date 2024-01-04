@@ -92,6 +92,9 @@ const Register = () => {
 
   const submitRegisterForm = async () => {
     setLoading(true);
+
+
+
     if (!name || !email || !password || !confirmPassword) {
       toast({
         title: "Please fill all the fields.",
@@ -118,20 +121,12 @@ const Register = () => {
       return;
     }
     try {
-      const result = {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      };
-      const { data } = await axios.post(`${api}/users/register`
-        ,
-        {
-          name,
+      const  registerUser  = await axios.post(`${api}/users/register`,{
+          name:name,
           email,
           password,
           pic,
-        },
-        result
+        }
       );
       toast({
         title: "Registration Successful",
@@ -140,13 +135,14 @@ const Register = () => {
         isClosable: true,
         position: "bottom",
       });
-      localStorage.setItem("userInfo", JSON.stringify(data));
+      console.log(registerUser);
+      localStorage.setItem("userInfo", JSON.stringify(registerUser));
       setLoading(false);
       //  history.push("/chats")
       <Navigate to="/chats"> </Navigate>;
     } catch (error) {
       console.log(error);
-    }
+    } 
   };
 
   return (
