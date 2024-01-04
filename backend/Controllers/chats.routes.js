@@ -47,13 +47,128 @@ chatController.post("/", async (req, res) => {
 });
 
 // fetch Chats
-chatController.get("/", async (req, res) => {});
+chatController.get("/", async (req, res) => {
+  const { userId } = req.body;
+  if(!userId){
+    return res.json({status:"Please Login First"})
+  }
+  try {
+    const findChatsByUserId = await ChatModel.find({
+      users: { $elemMatch: { $eq: userId } },
+    })
+      .populate("users", "-password")
+      .populate("groupAdmin", "-password")
+      .populate("latestMessage")
+      .sort({ updatedAt: -1 })
+      .then(async (results) => {
+        results = await UserModel.populate(results, {
+          path: "latestMessage.sender",
+          select: "name pic email",
+        });
+        res.status(200).json({ data:results });
+      });
+  } catch (error) {
+    console.log(error);
+  }
+});
 
-chatController.post("/group", async (req, res) => {});
+chatController.post("/creategroup", async (req, res) => {
+  const { users, groupName, userId } = req.body;
+  if (!users || !groupName) {
+    return res.status(400).json({ message: "Please fill all the fields" });
+  }
 
-chatController.put("/groupremove", async (req, res) => {});
+  let newUsers = JSON.parse(users);
+  if (newUsers.lenght < 2) {
+    return res
+      .status(400)
+      .json({ message: "More than 2 users are required to form a group " });
+  }
+  newUsers.push(userId);
 
-chatController.put("/groupadd", async (req, res) => {});
+  try {
+    const groupChat = await ChatModel.create({
+      groupName: groupName,
+      users: newUsers,
+      isGroupChat: true,
+      groupAdmin: userId,
+    });
+
+    const fullGroupChat = await ChatModel.findOne({ _id: groupChat._id })
+      .populate("users", "-password")
+      .populate("groupAdmin", "-password");
+
+    res.status(200).json({ message: fullGroupChat });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+chatController.put("/renamegroup", async (req, res) => {
+  const { groupId, groupName } = req.body;
+
+  const updatedGroup = await ChatModel.findByIdAndUpdate(
+    { _id: groupId },
+    { groupName },
+    { new: true }
+  )
+    .populate("users", "-password")
+    .populate("groupAdmin", "-password");
+
+  if (updatedGroup) {
+    return res.status(200).json({ message: updatedGroup });
+  } else {
+    return res.status(404).json({ message: "Group not found" });
+  }
+});
+
+chatController.put("/groupadd", async (req, res) => {
+  const { groupId, newUserId, userId } = req.body;
+
+
+  const existUser = await ChatModel.find({
+    users: { $elemMatch: { newUserId } },
+  });
+  console.log(existUser);
+  if (existUser) {
+    return res.json({ status: "User already added to group" });
+  }
+  const addedUser = await ChatModel.findByIdAndUpdate(
+    groupId,
+    {
+      $push: { users: newUserId },
+    },
+    { new: true }
+  )
+    .populate("users", "-password")
+    .populate("groupAdmin", "-password");
+
+  if (addedUser) {
+    res.status(200).json({ message: addedUser });
+  } else {
+    res.status(404).json({ message: "Group not found" });
+  }
+});
+
+chatController.put("/groupremove", async (req, res) => {
+  const { groupId, newUserId } = req.body;
+
+  const deletedUser = await ChatModel.findByIdAndUpdate(
+    groupId,
+    {
+      $pull: { users: newUserId },
+    },
+    { new: true }
+  )
+    .populate("users", "-password")
+    .populate("groupAdmin", "-password");
+
+  if (deletedUser) {
+    res.status(200).json({ message: deletedUser });
+  } else {
+    res.status(404).json({ message: "Group not found" });
+  }
+});
 
 chatController.patch("/edit", async (req, res) => {});
 

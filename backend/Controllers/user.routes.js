@@ -8,6 +8,8 @@ const searchController = express.Router();
 
 searchController.get("/", async (req, res) => {
   const { search } = req.query;
+  
+  console.log(req.query);
   const userId = req.body.id;
   const searchedUser = await UserModel.find({
     $or: [
@@ -79,6 +81,7 @@ userController.post("/login", async (req, res) => {
       data: {
         name: user.name,
         email: user.email,
+        pic:user.pic,
         token: generateToken(user._id),
       },
     });
