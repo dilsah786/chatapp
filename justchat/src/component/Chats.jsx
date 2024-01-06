@@ -10,7 +10,7 @@ import ChatBox from "../ChatPages/ChatBox";
 const Chats = () => {
   const [chats, setChats] = useState([]);
   const { user } = useContext(ChatContext);
-
+  const [fetchAgain,setFetchAgain] = useState(false);
   // console.log(user);
 
   const tokenFromLocal = JSON.parse(localStorage.getItem("userInfo"));
@@ -19,10 +19,8 @@ const Chats = () => {
     token = tokenFromLocal.data.token;
   }
 
- 
-
   return (
-    <Container>
+    <div style={{width:"100%"}} >
       {user && <SideDrawer />}
 
       <Box
@@ -32,13 +30,12 @@ const Chats = () => {
         gap={"500px"}
         w="100%"
         h="91.5vh"
-        
         p="10px"
       >
-        {user && <MyChats />}
-        {user && <ChatBox />}
+        {user && <MyChats fetchAgain={fetchAgain} setFetchAgain={setFetchAgain} />}
+        {user && <ChatBox fetchAgain={fetchAgain} setFetchAgain={setFetchAgain} />}
       </Box>
-    </Container>
+    </div>
   );
 };
 

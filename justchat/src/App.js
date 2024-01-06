@@ -10,9 +10,9 @@ import ProfileModal from "./miscellaneous/ProfileModal";
 
 function App() {
   return (
-    <div className="App">
+    <Box className="App">
      <AllRoutes/>
-    </div>
+    </Box>
   );
 }
 

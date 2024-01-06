@@ -173,7 +173,7 @@ const accessChat = async (id) => {
         </Box>
       </Box>
 
-      {/* Side Drawer from laft to Right */}
+      {/* Side Drawer from left to Right */}
 
       <Drawer placement={"left"} onClose={onClose} isOpen={isOpen}>
         <DrawerOverlay />

@@ -4,7 +4,6 @@ import React from 'react'
 
 const UserBadgeItem = ({user,handleSelectedUser}) => {
 
-    console.log(user);
 
   return (
     <Box

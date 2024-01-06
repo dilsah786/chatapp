@@ -115,7 +115,7 @@ chatController.put("/renamegroup", async (req, res) => {
 
   const updatedGroup = await ChatModel.findByIdAndUpdate(
     { _id: groupId },
-    { groupName },
+    { chatName:groupName },
     { new: true }
   )
     .populate("users", "-password")
@@ -128,17 +128,18 @@ chatController.put("/renamegroup", async (req, res) => {
   }
 });
 
-chatController.put("/groupadd", async (req, res) => {
+chatController.put("/addgroup", async (req, res) => {
   const { groupId, newUserId, userId } = req.body;
 
+    console.log(newUserId);
 
   const existUser = await ChatModel.find({
     users: { $elemMatch: { newUserId } },
   });
   console.log(existUser);
-  if (existUser) {
-    return res.json({ status: "User already added to group" });
-  }
+  // if (existUser) {
+  //   return res.json({ status: "User already added to group" });
+  // }
   const addedUser = await ChatModel.findByIdAndUpdate(
     groupId,
     {
@@ -156,7 +157,7 @@ chatController.put("/groupadd", async (req, res) => {
   }
 });
 
-chatController.put("/groupremove", async (req, res) => {
+chatController.put("/removegroup", async (req, res) => {
   const { groupId, newUserId } = req.body;
 
   const deletedUser = await ChatModel.findByIdAndUpdate(

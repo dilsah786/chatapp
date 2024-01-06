@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   Modal,
   ModalOverlay,
@@ -16,10 +16,11 @@ import {
   Image,
 } from "@chakra-ui/react";
 import { ViewIcon } from "@chakra-ui/icons";
+import { ChatContext } from "../Context/chatContext";
 
-const ProfileModal = ({ user, children }) => {
-
-  console.log(user);
+const ViewProfile = ({ children }) => {
+  const { user, selectedChat, setSelectedChat } = useContext(ChatContext);
+  console.log(selectedChat);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -39,7 +40,9 @@ const ProfileModal = ({ user, children }) => {
             d="flex"
             justifyContent="center"
           >
-            {user.name}
+            {selectedChat.users[1]._id === user.id
+              ? selectedChat.users[0].name
+              : selectedChat.users[1].name}
           </ModalHeader>
           <ModalCloseButton />
           <ModalBody
@@ -51,14 +54,25 @@ const ProfileModal = ({ user, children }) => {
             <Image
               borderRadius="full"
               boxSize="150px"
-              src={user.pic}
-              alt={user.name}
+              src={
+                selectedChat.users[1]._id === user.id
+                  ? selectedChat.users[0].pic
+                  : selectedChat.users[1].pic
+              }
+              alt={
+                selectedChat.users[1]._id === user.id
+                  ? selectedChat.users[0].name
+                  : selectedChat.users[1].name
+              }
             />
             <Text
               fontSize={{ base: "28px", md: "30px" }}
               fontFamily="Work sans"
             >
-              Email: {user.email}
+              Email:{" "}
+              {selectedChat.users[1]._id === user.id
+                ? selectedChat.users[0].email
+                : selectedChat.users[1].email}
             </Text>
           </ModalBody>
           <ModalFooter>
@@ -70,4 +84,4 @@ const ProfileModal = ({ user, children }) => {
   );
 };
 
-export default ProfileModal;
+export default ViewProfile;
