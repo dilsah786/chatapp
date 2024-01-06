@@ -76,23 +76,26 @@ chatController.post("/", async (req, res) => {
 
 
 chatController.post("/creategroup", async (req, res) => {
-  const { users, groupName, userId } = req.body;
-  if (!users || !groupName) {
+  const { users, chatName, userId } = req.body;
+  if (!users || !chatName) {
+    if(!users){
+      return res.json({message:"Please select users"})
+    }
     return res.status(400).json({ message: "Please fill all the fields" });
   }
+ console.log(users);
 
-  let newUsers = JSON.parse(users);
-  if (newUsers.lenght < 2) {
-    return res
+  if (users.length < 2) {
+    return res 
       .status(400)
       .json({ message: "More than 2 users are required to form a group " });
   }
-  newUsers.push(userId);
+   users.push(userId);
 
   try {
     const groupChat = await ChatModel.create({
-      groupName: groupName,
-      users: newUsers,
+      chatName: chatName,
+      users: users,
       isGroupChat: true,
       groupAdmin: userId,
     });

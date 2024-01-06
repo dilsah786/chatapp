@@ -22,6 +22,7 @@ import { Form } from "react-router-dom";
 import Loader from "./Loader";
 import UserAvatar from "../ChatPages/UserAvatar";
 import UserBadgeItem from "./UserBadgeItem";
+import UserToAdd from "../ChatPages/UserToAdd";
 
 const GroupChatModal = ({ children }) => {
   const [groupChatName, setGroupChatName] = useState();
@@ -42,7 +43,6 @@ const GroupChatModal = ({ children }) => {
 
     try {
       setLoading(true);
-
       const result = await fetch(`${api}/users?search=${search}`, {
         method: "GET",
         headers: {
@@ -61,7 +61,39 @@ const GroupChatModal = ({ children }) => {
 
   console.log(searchResult);
 
-  const handleSubmit = () => {};
+  const handleSubmit = async() => {
+    if (!groupChatName || !selectedUsers) {
+      toast({
+        title: "Please fill all the fields",
+        status: "warning",
+        duration: 5000,
+        isClosable: true,
+        position: "top",
+      });
+      return;
+    }  
+    console.log(selectedUsers);
+    const idsOfUsers = [];
+    selectedUsers.map((user)=> idsOfUsers.push(user._id))
+
+     console.log(idsOfUsers);
+
+    try {
+      const result = await fetch(`${api}/chat/creategroup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization:`Bearer ${token}`
+        },
+        body: JSON.stringify({chatName:groupChatName,users:idsOfUsers}),
+      });
+      const res = await result.json();
+      console.log(res);  
+    } catch (err) {
+      console.log(err);
+    }
+    // setChats() 
+  };
 
   const handleAddGroup = (userToAdd) => {
     if (selectedUsers.includes(userToAdd)) {
@@ -77,7 +109,10 @@ const GroupChatModal = ({ children }) => {
     setSelectedUsers([...selectedUsers, userToAdd]);
   };
 
-  const handleDelete = (user) => {};
+  const handleDelete = (user) => {
+    console.log(user);
+    setSelectedUsers(selectedUsers.filter((sel) => sel._id !== user._id));
+  };
 
   console.log(selectedUsers);
 
@@ -117,22 +152,22 @@ const GroupChatModal = ({ children }) => {
                 bg={"whitesmoke "}
               />
             </FormControl>
-            {selectedUsers.map((user) => {
-              return (
+            <Box w={"100%"} display={"flex"} flexWrap={"wrap"}>
+              {selectedUsers.map((user) => (
                 <UserBadgeItem
                   key={user._id}
                   user={user}
                   handleSelectedUser={() => handleDelete(user)}
                 />
-              );
-            })}
+              ))}{" "}
+            </Box>
             {loading ? (
               <Loader />
             ) : (
               searchResult
                 ?.slice(0, 4)
                 .map((user) => (
-                  <UserAvatar
+                  <UserToAdd
                     key={user._id}
                     user={user}
                     handleGroup={() => handleAddGroup(user)}
@@ -143,8 +178,8 @@ const GroupChatModal = ({ children }) => {
           </ModalBody>
 
           <ModalFooter>
-            <Button colorScheme="blue" mr={3}  onClick={handleSubmit}>
-              Submit
+            <Button colorScheme="blue" mr={3} onClick={handleSubmit}>
+              Create Chat
             </Button>
           </ModalFooter>
         </ModalContent>

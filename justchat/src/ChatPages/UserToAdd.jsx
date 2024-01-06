@@ -1,11 +1,11 @@
 import { Avatar, Box, Text } from "@chakra-ui/react";
 import React from "react";
 
-const UserAvatar = ({ user, handleSingleChat, handleGroup }) => {
+const UserToAdd = ({ user, handleGroup }) => {
 
   return (
     <Box
-      onClick={handleSingleChat}
+      onClick={handleGroup}
       cursor="pointer"
       bg="#E8E8E8"
       _hover={{ bg: "#38B2AC", color: "white" }}
@@ -37,4 +37,4 @@ const UserAvatar = ({ user, handleSingleChat, handleGroup }) => {
   );
 };
 
-export default UserAvatar;
+export default UserToAdd;
