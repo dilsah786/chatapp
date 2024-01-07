@@ -58,9 +58,7 @@ const GroupChatModal = ({ children }) => {
       console.log(error);
     }
   };
-
-  console.log(searchResult);
-
+  
   const handleSubmit = async() => {
     if (!groupChatName || !selectedUsers) {
       toast({
@@ -114,7 +112,7 @@ const GroupChatModal = ({ children }) => {
     setSelectedUsers(selectedUsers.filter((sel) => sel._id !== user._id));
   };
 
-  console.log(selectedUsers);
+
 
   return (
     <div>

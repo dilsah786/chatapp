@@ -22,7 +22,7 @@ import UserBadgeItem from "../miscellaneous/UserBadgeItem";
 import UserAvatar from "./UserAvatar";
 import api from "../config";
 
-const UpdateGroupChat = () => {
+const UpdateGroupChat = ( {  fetchMessages}) => {
   const [groupChatName, setGroupChatName] = useState();
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
@@ -74,6 +74,7 @@ const UpdateGroupChat = () => {
     removeUser._id ===user._id ? setSelectedChat(): setSelectedChat(res.message);
     setFetchAgain(!fetchAgain);
     setRenameLoading(false);
+    fetchMessages()
     toast({
       title: "User removed from group",
       status: "success",
@@ -93,8 +94,6 @@ const UpdateGroupChat = () => {
 
 
   };
-console.log(selectedChat);
-console.log(user);
 
   const handleAddUser = async(newUser) => {
     console.log(newUser);

@@ -20,7 +20,7 @@ import { ChatContext } from "../Context/chatContext";
 
 const ViewProfile = ({ children }) => {
   const { user, selectedChat, setSelectedChat } = useContext(ChatContext);
-  console.log(selectedChat);
+
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 

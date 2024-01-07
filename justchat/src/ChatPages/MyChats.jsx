@@ -20,7 +20,7 @@ const MyChats = ({fetchAgain}) => {
   } = useContext(ChatContext);
   const toast = useToast();
 
-  console.log(chats);
+
 
   const fetchChats = async () => {
     try {
@@ -40,7 +40,6 @@ const MyChats = ({fetchAgain}) => {
   };
 
   const getSender = (loggedUser, users) => {
-    console.log(users);
     if (users.length > 1) {
       return users[0]._id === loggedUser.id ? users[1].name : users[0].name;
     }

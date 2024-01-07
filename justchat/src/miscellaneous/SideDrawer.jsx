@@ -38,8 +38,15 @@ const SideDrawer = () => {
   const [searchResult, setSearchResult] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingChat, setLoadingChat] = useState();
-  const { user, logout, token,selecredChat, setSelectedChat, chats, setChats } =
-    useContext(ChatContext);
+  const {
+    user,
+    logout,
+    token,
+    selectedChat,
+    setSelectedChat,
+    chats,
+    setChats,
+  } = useContext(ChatContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
@@ -64,7 +71,7 @@ const SideDrawer = () => {
       });
       const res = await searchedUser.json();
       setSearchResult(res.data);
-      setLoadingChat(false)
+      setLoadingChat(false);
       setLoading(false);
     } catch (err) {
       console.log(err);
@@ -78,15 +85,12 @@ const SideDrawer = () => {
     }
   };
 
-  console.log(chats);
-
-
-const accessChat = async (id) => {
+  const accessChat = async (id) => {
     console.log(id);
-   
+
     try {
-      const userId = user.id;   
-    console.log(userId);
+      const userId = user.id;
+      console.log(userId);
 
       setLoadingChat(true);
       const result = await fetch(`${api}/chat`, {
@@ -95,15 +99,14 @@ const accessChat = async (id) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({user:id,userId:userId}),
+        body: JSON.stringify({ user: id, userId: userId }),
       });
-      
-      const res  = await result.json();
+
+      const res = await result.json();
 
       console.log(res);
-      if(!chats.find((c)=> c._id === res._id ))
-      setChats([res, ...chats])
-    
+      if (!chats.find((c) => c._id === res._id)) setChats([res, ...chats]);
+
       setSelectedChat(res);
       setLoadingChat(false);
       onClose();
@@ -120,7 +123,6 @@ const accessChat = async (id) => {
     }
   };
 
-  console.log(searchResult);
   return (
     <>
       <Box
