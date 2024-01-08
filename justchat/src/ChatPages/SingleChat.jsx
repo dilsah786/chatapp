@@ -13,50 +13,55 @@ import ProfileModal from "../miscellaneous/ProfileModal";
 import ViewProfile from "./ViewProfile";
 import UpdateGroupChat from "./UpdateGroupChat";
 import { Form } from "react-router-dom";
+import io from "socket.io-client";
 import api from "../config";
+import Lottie from "react-lottie";
 import ScrollableChats from "./ScrollableChats";
+import { defaultOptions, getSender, getSenderFull } from "./important";
+
+const ENDPOINT = "http://localhost:5000";
+
+let socket, selectedChatCompare;
 
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newMessages, setNewMessages] = useState([]);
-  const { user, selectedChat, setSelectedChat,token } = useContext(ChatContext);
+  const { user, selectedChat, setSelectedChat, token } =
+    useContext(ChatContext);
+  const [socketConnected, setSocketConnected] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const [istyping, setIsTyping] = useState(false);
 
   //   const getSender = (loggedUser,users) => {
   //     return   users[0]._id === loggedUser.id ? users[1].name : users[0].name;
   // }
 
-  const fetchMessages = async() =>{
-    if(!selectedChat){
+  const fetchMessages = async () => {
+    if (!selectedChat) {
       return;
     }
-    try{
+    try {
       setLoading(true);
-     const result = await fetch(`${api}/messages/${selectedChat._id}`,{
-      method:"GET",
-      headers:{
-        Authorization:`Bearer ${token}`
-      }
-     })
+      const result = await fetch(`${api}/messages/${selectedChat._id}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-     const res = await result.json();
-     console.log(res.allMessages);
-   
-     setLoading(false);
-     setMessages(res.allMessages)
-
-    }catch(err){
+      const res = await result.json();
+      setLoading(false);
+      socket.emit("join chat", selectedChat._id);
+      setMessages(res.data);
+    } catch (err) {
       console.log(err);
     }
-
-  }
-
-
+  };
 
   const sendMessage = async (event) => {
     if (event.key === "Enter" && newMessages) {
       try {
-        
         const result = await fetch(`${api}/messages`, {
           method: "POST",
           headers: {
@@ -69,11 +74,12 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
           }),
         });
         const res = await result.json();
-        console.log(res.data);
+        const emitData = res.data;
+        socket.emit("new message", emitData);
+        setMessages([...messages, emitData]);
         setNewMessages("");
-       setMessages([...messages,res.data])
       } catch (error) {
-        console.log(error); 
+        console.log(error);
       }
     }
   };
@@ -82,10 +88,36 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     setNewMessages(e.target.value);
   };
 
-  useEffect(()=>{
-    fetchMessages()
-  },[selectedChat])
+  useEffect(() => {
+    socket = io(ENDPOINT);
+    socket.emit("setup", user);
+    socket.on("connected", () => {
+      setSocketConnected(true);
+    });
+  }, []);
 
+  useEffect(() => {
+    fetchMessages();
+    selectedChatCompare = selectedChat;
+  }, [selectedChat]);
+
+  useEffect(() => {
+    socket.on("new message", (newMessageRecieved) => {
+      if (
+        !selectedChatCompare ||
+        selectedChatCompare._id !== newMessageRecieved.chat._id
+      ) {
+        // give notification
+        // if (!notification.includes(newMessageRecieved)) {
+        //   setNotification([newMessageRecieved, ...notification]);
+        //   setFetchAgain(!fetchAgain);
+        // }
+      } else {
+        setMessages([...messages, newMessageRecieved]);
+      }
+    });
+  });
+  console.log(selectedChat);
 
   return (
     <>
@@ -108,11 +140,11 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
               icon={<ArrowBackIcon w={"4"} />}
               onClick={() => setSelectedChat("")}
             />
-            {!selectedChat.isGroupChat ? (
-              <Box display={"flex"} flexDir={"row"}>
-                {selectedChat.users[0].name}
-                <ViewProfile />
-              </Box>
+            {messages && !selectedChat.isGroupChat ? (
+              <>
+                {getSender(user, selectedChat.users)}
+                <ViewProfile user={getSenderFull(user, selectedChat.users)} />
+              </>
             ) : (
               <>
                 {selectedChat.chatName.toUpperCase()}
@@ -125,29 +157,28 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             )}
           </Text>
           <Box
-            display={"flex"}
-            flexDir={"column"}
-            justifyContent={"flex-end"}
+            display="flex"
+            flexDir="column"
+            justifyContent="flex-end"
             p={3}
-            bg={"#E8E8E8"}
-            w={"100%"}
-            h={"100%"}
-            borderRadius={"lg"}
-            overflow={"hidden"}
+            bg="#E8E8E8"
+            w="100%"
+            h="100%"
+            borderRadius="lg"
+            overflowY="hidden"
           >
             {loading ? (
               <Spinner
-                size={"xl"}
+                size="xl"
                 w={20}
                 h={20}
-                alignSelf={"center"}
-                margin={"auto"}
+                alignSelf="center"
+                margin="auto"
               />
             ) : (
-               <div  className="message">
-
+              <div className="message">
                 <ScrollableChats messages={messages} />
-               </div>
+              </div>
             )}
 
             <FormControl
@@ -156,6 +187,18 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
               isRequired
               mt={3}
             >
+              {istyping ? (
+                <div>
+                  <Lottie
+                    options={defaultOptions}
+                    // height={50}
+                    width={70}
+                    style={{ marginBottom: 15, marginLeft: 0 }}
+                  />
+                </div>
+              ) : (
+                <></>
+              )}
               <Input
                 variant="filled"
                 bg="#E0E0E0"
@@ -167,8 +210,10 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
           </Box>
         </>
       ) : (
-        <Box>
-          <Text>Click on a user to start Chatting</Text>
+        <Box d="flex" alignItems="center" justifyContent="center" h="100%">
+          <Text fontSize="3xl" pb={3} fontFamily="Work sans">
+            Click on a user to start chatting
+          </Text>
         </Box>
       )}
     </>

@@ -1,8 +1,6 @@
 import {
   BellIcon,
   ChevronDownIcon,
-  Search2Icon,
-  SearchIcon,
 } from "@chakra-ui/icons";
 import {
   Avatar,
@@ -85,9 +83,8 @@ const SideDrawer = () => {
     }
   };
 
-  const accessChat = async (id) => {
+ const accessChat = async (id) => {
     console.log(id);
-
     try {
       const userId = user.id;
       console.log(userId);
@@ -105,9 +102,11 @@ const SideDrawer = () => {
       const res = await result.json();
 
       console.log(res);
-      if (!chats.find((c) => c._id === res._id)) setChats([res, ...chats]);
+      if (!chats.find((c) => c._id === res._id)) setChats([...chats,res]);
+      
+      console.log(selectedChat);
 
-      setSelectedChat(res);
+      setSelectedChat(res.data);
       setLoadingChat(false);
       onClose();
     } catch (error) {
@@ -125,19 +124,19 @@ const SideDrawer = () => {
 
   return (
     <>
-      <Box
+       <Box
         display="flex"
         justifyContent="space-between"
         alignItems="center"
         bg="white"
         w="100%"
         p="5px 10px 5px 10px"
-        borderRadius="5px"
+        borderWidth="5px"
       >
-        <Tooltip label="Search users to chat" hasArrow placement="bottom-end">
-          <Button onClick={onOpen} variant="ghost">
-            <SearchIcon />
-            <Text display={{ base: "none", md: "flex" }} px="4">
+        <Tooltip label="Search Users to chat" hasArrow placement="bottom-end">
+          <Button variant="ghost" onClick={onOpen}>
+            <i className="fas fa-search"></i>
+            <Text d={{ base: "none", md: "flex" }} px={4}>
               Search User
             </Text>
           </Button>
@@ -145,69 +144,65 @@ const SideDrawer = () => {
         <Text fontSize="2xl" fontFamily="Work sans">
           Justchat
         </Text>
-        <Box>
+        <div>
           <Menu>
-            <MenuButton fontSize={"2xl"} p={1}>
-              {" "}
-              <BellIcon />{" "}
+            <MenuButton p={1}>
+              {/* <NotificationBadge
+                count={notification.length}
+                effect={Effect.SCALE}
+              /> */}
+              <BellIcon fontSize="2xl" m={1} />
             </MenuButton>
-            {/* <MenuList></MenuList> */}
+            {/* Notification */}
           </Menu>
           <Menu>
-            <MenuButton>
-              <Button fontSize={"1xl"} leftIcon={<ChevronDownIcon />}>
-                <Avatar
-                  size={"sm"}
-                  cursor={"pointer"}
-                  src={user.pic}
-                  name={user.name}
-                />
-              </Button>
+          <MenuButton as={Button} bg="white" rightIcon={<ChevronDownIcon />}>
+              <Avatar
+                size="sm"
+                cursor="pointer"
+                name={user.name}
+                src={user.pic}
+              />
             </MenuButton>
             <MenuList>
               <ProfileModal user={user}>
-                <MenuItem>My Profile</MenuItem>
+                <MenuItem>My Profile</MenuItem>{" "}
               </ProfileModal>
               <MenuDivider />
-              <MenuItem onClick={() => logout()}>Logout</MenuItem>
+              <MenuItem onClick={logout}>Logout</MenuItem>
             </MenuList>
           </Menu>
-        </Box>
+        </div>
       </Box>
 
       {/* Side Drawer from left to Right */}
 
-      <Drawer placement={"left"} onClose={onClose} isOpen={isOpen}>
+      <Drawer placement="left" onClose={onClose} isOpen={isOpen}>
         <DrawerOverlay />
         <DrawerContent>
-          <DrawerHeader borderBottomWidth="1px">Search User</DrawerHeader>
+          <DrawerHeader borderBottomWidth="1px">Search Users</DrawerHeader>
           <DrawerBody>
-            <Box display={"flex"} pb={2}>
+            <Box d="flex" pb={2}>
               <Input
-                placeholder={"Search by name or email"}
+                placeholder="Search by name or email"
                 mr={2}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
-              <Button onClick={handleSearchUser}>
-                <Search2Icon />
-              </Button>
+              <Button onClick={handleSearchUser}>Go</Button>
             </Box>
-            <h1>Resuls: </h1>
             {loading ? (
               <Loader />
             ) : (
-              searchResult?.map((user) => {
-                return (
-                  <UserAvatar
-                    key={user._id}
-                    user={user}
-                    handleSingleChat={() => accessChat(user._id)}
-                  />
-                );
-              })
+              searchResult?.map((user) => (
+                <UserAvatar
+                  key={user._id}
+                  user={user}
+                  handleSingleChat={() => accessChat(user._id)}
+                />
+              ))
             )}
-            {loadingChat && <Spinner ml="auto" display="flex" />}
+            {loadingChat && <Spinner ml="auto" d="flex" />}
           </DrawerBody>
         </DrawerContent>
       </Drawer>

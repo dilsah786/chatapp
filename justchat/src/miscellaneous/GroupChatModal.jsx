@@ -121,54 +121,50 @@ const GroupChatModal = ({ children }) => {
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader
-            fontSize={"35px"}
-            fontFamily={"Work sans"}
-            display={"flex"}
-            justifyContent={"center"}
+        <ModalHeader
+            fontSize="35px"
+            fontFamily="Work sans"
+            d="flex"
+            justifyContent="center"
           >
-            Create Group Chats
+            Create Group Chat
           </ModalHeader>
           <ModalCloseButton />
-          <ModalBody display={"flex"} flexDir={"column"} alignItems={"center"}>
+          <ModalBody d="flex" flexDir="column" alignItems="center">
             <FormControl>
               <Input
                 placeholder="Chat Name"
                 mb={3}
                 onChange={(e) => setGroupChatName(e.target.value)}
-                width={"100%"}
-                bg={"whitesmoke "}
-                border={"5px"}
-                borderRadius={"10"}
               />
             </FormControl>
             <FormControl>
               <Input
-                placeholder="Add Users eg: John, Dilnawaz, Tabish"
+                placeholder="Add Users eg: Dilnawaz, abc, amir"
                 mb={1}
                 onChange={(e) => handleSearch(e.target.value)}
-                bg={"whitesmoke "}
               />
             </FormControl>
-            <Box w={"100%"} display={"flex"} flexWrap={"wrap"}>
-              {selectedUsers.map((user) => (
+            <Box w="100%" display="flex" flexWrap="wrap">
+              {selectedUsers.map((u) => (
                 <UserBadgeItem
-                  key={user._id}
-                  user={user}
-                  handleSelectedUser={() => handleDelete(user)}
+                  key={u._id}
+                  user={u}
+                  handleSelectedUser={() => handleDelete(u)}
                 />
-              ))}{" "}
+              ))}
             </Box>
+
             {loading ? (
               <Loader />
             ) : (
               searchResult
                 ?.slice(0, 4)
                 .map((user) => (
-                  <UserToAdd
+                  <UserAvatar
                     key={user._id}
                     user={user}
-                    handleGroup={() => handleAddGroup(user)}
+                    handleSingleChat={() => handleAddGroup(user)}
                   />
                 ))
             )}
@@ -176,7 +172,7 @@ const GroupChatModal = ({ children }) => {
           </ModalBody>
 
           <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={handleSubmit}>
+          <Button onClick={handleSubmit} colorScheme="blue">
               Create Chat
             </Button>
           </ModalFooter>
