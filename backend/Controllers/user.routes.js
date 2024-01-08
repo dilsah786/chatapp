@@ -68,9 +68,9 @@ userController.post("/register", async (req, res) => {
 userController.post("/login", async (req, res) => {
   const { email, password } = req.body;
   const user = await UserModel.findOne({ email: email });
-  console.log(user);
+
   const hashedPassword = user.password;
-  console.log(hashedPassword);
+
   bcrypt.compare(password, hashedPassword, function (err, result) {
     // result == true
 
